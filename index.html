@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
+
 <body class="min-h-screen bg-gradient-to-b from-blue-100 via-purple-100 to-pink-100">
   <div id="app">
     <!-- Header -->
@@ -18,13 +20,9 @@
     <!-- Navbar for Theme Selection -->
     <nav class="bg-white/90 shadow-md sticky top-0 z-50">
       <div class="container mx-auto flex justify-around p-4">
-        <button
-          v-for="(theme, key) in themes"
-          :key="key"
-          @click="selectTheme(key)"
+        <button v-for="(theme, key) in themes" :key="key" @click="selectTheme(key)"
           :class="{'text-purple-600': activeTheme === key, 'text-gray-600': activeTheme !== key}"
-          class="flex flex-col items-center hover:text-purple-600 transition-colors"
-        >
+          class="flex flex-col items-center hover:text-purple-600 transition-colors">
           <div class="text-2xl">{{ theme.emoji }}</div>
           <span class="text-sm font-bold">{{ theme.name }}</span>
         </button>
@@ -34,22 +32,42 @@
     <!-- Main Content -->
     <main class="container mx-auto p-4 md:p-8">
       <!-- Word Cards (Visible only when not in practice mode) -->
-      <div v-if="!isPracticeMode" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-8">
-        <div
-          v-for="(word, index) in themes[activeTheme].words"
-          :key="index"
-          class="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 cursor-pointer"
-        >
-          <div class="text-4xl mb-4">{{ word.image }}</div>
-          <h3 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            {{ word.nasa }}
-          </h3>
-          <p class="text-gray-600">{{ word.spanish }}</p>
+      <div v-if="!isPracticeMode" class="container mx-auto p-4 md:p-8">
+
+        <!--Especial alphabet -->
+        <div v-if="activeTheme==='alphabet'" class="container mx-auto p-4 md:p-8">
+          <div v-for="entrada of Object.entries(themes[activeTheme].words)">
+            <div class="tituloListaLetras">
+              {{convertPascalCase(entrada[0])}}
+            </div>
+            <div class="listaLetras grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-8">
+              <div v-for="(word, index) in entrada[1]" :key="index"
+                class="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 cursor-pointer">
+                <div class="text-4xl mb-4">{{ word.image }}</div>
+                <h3
+                  class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  {{ word.nasa }}
+                </h3>
+                <p class="text-gray-600">{{ word.spanish }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-8">
+          <div v-for="(word, index) in themes[activeTheme].words" :key="index"
+            class="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 cursor-pointer">
+            <div class="text-4xl mb-4">{{ word.image }}</div>
+            <h3 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              {{ word.nasa }}
+            </h3>
+            <p class="text-gray-600">{{ word.spanish }}</p>
+          </div>
         </div>
       </div>
 
       <!-- Practice Mode -->
-      <div v-if="isPracticeMode" class="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-lg max-w-2xl mx-auto mt-8 text-center">
+      <div v-if="isPracticeMode"
+        class="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-lg max-w-2xl mx-auto mt-8 text-center">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             Modo Práctica {{ themes[activeTheme].emoji }}
@@ -65,44 +83,37 @@
             ¿Cómo se dice "{{ selectedWord.spanish }}" en Nasa Yuwe?
           </p>
           <div class="flex flex-col items-center gap-4">
-            <input
-              v-model="userAnswer"
-              type="text"
+            <input v-model="userAnswer" type="text"
               class="border-3 border-purple-300 rounded-full px-6 py-3 w-full max-w-md text-center text-lg focus:outline-none focus:border-pink-500 transition-colors"
-              placeholder="¡Escribe tu respuesta aquí! ✍️"
-            />
-            <button
-              @click="checkAnswer"
-              class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full hover:shadow-lg transition-all transform hover:scale-105"
-            >
+              placeholder="¡Escribe tu respuesta aquí! ✍️" />
+            <button @click="checkAnswer"
+              class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full hover:shadow-lg transition-all transform hover:scale-105">
               Ok
             </button>
           </div>
-          <button v-if="!showHint" @click="showHint = true" class="text-purple-500 hover:text-pink-500 transition-colors">
+          <button v-if="!showHint" @click="showHint = true"
+            class="text-purple-500 hover:text-pink-500 transition-colors">
             ¿Necesitas una pista? 🤔
           </button>
           <p v-if="showHint" class="text-purple-600">
             La palabra empieza con "{{ selectedWord.nasa[0] }}"...
           </p>
-          <div v-if="isCorrect !== null" :class="isCorrect ? 'text-green-500' : 'text-red-500'" class="text-xl font-bold">
+          <div v-if="isCorrect !== null" :class="isCorrect ? 'text-green-500' : 'text-red-500'"
+            class="text-xl font-bold">
             <p v-if="isCorrect">¡Increíble! 🎉 +10 puntos</p>
             <p v-else>¡Casi! La respuesta era: {{ selectedWord.nasa }}</p>
-            <button
-              @click="generateExercise"
-              class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full mt-4 hover:shadow-lg transition-all transform hover:scale-105"
-            >
+            <button @click="generateExercise"
+              class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full mt-4 hover:shadow-lg transition-all transform hover:scale-105">
               Siguiente palabra 👉
             </button>
           </div>
         </div>
       </div>
-      
+
       <!-- Button to Start Practice (Visible when not in practice mode) -->
-      <div v-if="!isPracticeMode" class="flex justify-center mt-8">
-        <button
-          @click="startPractice"
-          class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-full text-lg font-bold hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2"
-        >
+      <div v-if="!isPracticeMode && activeTheme!='alphabet'" class="flex justify-center mt-8">
+        <button @click="startPractice"
+          class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-full text-lg font-bold hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2">
           🎯 ¡Comenzar práctica!
         </button>
       </div>
@@ -110,173 +121,269 @@
     </main>
   </div>
 
-<script>
-  const app = Vue.createApp({
-    data() {
-      return {
-        themes: {
-          alphabet: {
-            name: "Alfabeto",
-            emoji: "🔠",
-            words: [              
-              { nasa: "J", }, 
-              { nasa: "K", },
-              { nasa: "L", },
-              { nasa: "M", },
-              { nasa: "N", },
-              { nasa: "P", },
-              { nasa: "S", },
-              { nasa: "T", },
-              { nasa: "V", },
-              { nasa: "W", },
-              { nasa: "Y", },
-              { nasa: "X", }                                            
-              { nasa: "A, E, I, U" }              
-              { nasa: "KH", }, 
-              { nasa: "PH", },
-              { nasa: "TH", },
-              { nasa: "MH", },              
-              { nasa: "a', e', i', u'", },              
-              { nasa: "aa, ee, ii, uu", },              
-              { nasa: "ä, ë, ï, ü", },               
+  <script>
+    const app = Vue.createApp({
+      data() {
+        return {
+          themes: {
+            alphabet: {
+              name: "Alfabeto",
+              emoji: "🔠",
+              words: {
+                ConsonantesSencillas: [
+                  {nasa: "J", },
+                  {nasa: "K", },
+                  {nasa: "L", },
+                  {nasa: "M", },
+                  {nasa: "N", },
+                  {nasa: "P", },
+                  {nasa: "S", },
+                  {nasa: "T", },
+                  {nasa: "V", },
+                  {nasa: "W", },
+                  {nasa: "Y", },
+                  {nasa: "X"},
                 ],
+                ConsonantesPalatalizadas: [
+                  {nasa: "ÇX", },
+                  {nasa: "JX", },
+                  {nasa: "KX", },
+                  {nasa: "LX", },
+                  {nasa: "NX", },
+                  {nasa: "PX", },
+                  {nasa: "SX", },
+                  {nasa: "TX", },
+                  {nasa: "VX", },
+                  {nasa: "FX", },
+                ],
+                ConsonantesAspiradas: [
+                  {nasa: "PH", },
+                  {nasa: "TH", },
+                  {nasa: "MH", },
+                  {nasa: "KH", },
+                ],
+                ConsonantesAspiradasPalatalizadas: [
+                  {nasa: "KXH", },
+                  {nasa: "PXH", },
+                  {nasa: "TXH", },
+                ],
+                ConsonantesPrenasalesSencillas: [
+                  {nasa: "B", },
+                  {nasa: "D", },
+                  {nasa: "G", },
+                  {nasa: "Z", },
+                ],
+                ConsonantesPrenasalesPalatalizadas: [
+                  {nasa: "BX", },
+                  {nasa: "DX", },
+                  {nasa: "GX", },
+                  {nasa: "ZX", },
+                ],
+                VocalesSencillas: [
+                  {nasa: "A"},
+                  {nasa: "E"},
+                  {nasa: "I"},
+                  {nasa: "U"},
+                ],
+                VocalesInterruptas: [
+                  {nasa: "A'"},
+                  {nasa: "E'"},
+                  {nasa: "I'"},
+                  {nasa: "U'"},
+                ],
+                VocalesAlargadas: [
+                  {nasa: "Aa"},
+                  {nasa: "Ee"},
+                  {nasa: "Ii"},
+                  {nasa: "Uu"},
+                ],
+                VocalesNasales: [
+                  {nasa: "Ä"},
+                  {nasa: "Ë"},
+                  {nasa: "Ï"},
+                  {nasa: "Ü"},
+                ],
+                VocalesNasalesAlargadas: [
+                  {nasa: "Äa"},
+                  {nasa: "Ëe"},
+                  {nasa: "Ïi"},
+                  {nasa: "Üu"},
+                ],
+                VocalesNasalesInterruptas: [
+                  {nasa: "Ä'"},
+                  {nasa: "Ë'"},
+                  {nasa: "Ï'"},
+                  {nasa: "Ü'"},
+                ],
+                VocalesNasalesAspiradas: [
+                  {nasa: "Äh"},
+                  {nasa: "Ëh"},
+                  {nasa: "Ïh"},
+                  {nasa: "Üh"},
+                ],
+              },
+            },
+            greetings: {
+              name: "Saludos",
+              emoji: "👋",
+              words: [
+                {nasa: "Ewçxa", spanish: "Hola", image: "👋"},
+                {nasa: "Ma'wkwe pe'th", spanish: "Buenos días", image: "🌅"},
+                {nasa: "Ma'wkwe fxi'z", spanish: "Buenas tardes", image: "🌇"},
+                {nasa: "Ma'wkwe ikus", spanish: "Buenas noches", image: "🌇"},
+                {nasa: "Ewçxa pe'th", spanish: "Estoy bien", image: "😊"},
+                {nasa: "Suwe", spanish: "¿Cómo estás?", image: "🤔"},
+                {nasa: "Weçx yuwe'kwe", spanish: "Bienvenidos", image: "🏡"},
+                {nasa: "Pay", spanish: "Gracias", image: "🖐️"},
+              ],
+            },
+            introductions: {
+              name: "Introducciones",
+              emoji: "📜",
+              words: [
+                {nasa: "Ädxa' yaasth", spanish: "Me llamo (Hombre)", image: "🤖"},
+                {nasa: "Ü'ka yaasth", spanish: "Me llamo (Mujer)", image: "🤖"},
+                {nasa: "Ju we'sxth", spanish: "Soy de", image: "🧑‍🏫"},
+                {nasa: "E'ba a'kafx ji'pth", spanish: "Tengo ... años", image: "😊"},
+                {nasa: "Teth mhi'", spanish: "Trabajo en", image: "🤔"},
+                {nasa: "Weçx wësejï'k", spanish: "Gracias por escucharme", image: "🤝"},
+              ],
+            },
+            numbers: {
+              name: "Números",
+              emoji: "🔢",
+              words: [
+                {nasa: "Teeçx", spanish: "Uno", image: "1️⃣"},
+                {nasa: "E'z", spanish: "Dos", image: "2️⃣"},
+                {nasa: "Tekh", spanish: "Tres", image: "3️⃣"},
+                {nasa: "Pahz", spanish: "Cuatro", image: "4️⃣"},
+                {nasa: "Tahç", spanish: "Cinco", image: "5️⃣"},
+                {nasa: "Setx", spanish: "Seis", image: "6️⃣"},
+                {nasa: "Sa't", spanish: "Siete", image: "7️⃣"},
+                {nasa: "Tawn", spanish: "Ocho", image: "8️⃣"},
+                {nasa: "Kheb", spanish: "Nueve", image: "9️⃣"},
+                {nasa: "Kseba", spanish: "Diez", image: "🔟"},
+              ],
+            },
+            family: {
+              name: "Familia",
+              emoji: "👨‍👩‍👧‍👦",
+              words: [
+                {nasa: "Tata", spanish: "Padre", image: "👨‍🦳"},
+                {nasa: "Uma", spanish: "Madre", image: "👩‍🦳"},
+                {nasa: "Yakhthẽ'", spanish: "Hermano", image: "👦"},
+                {nasa: "Zxi'sx", spanish: "Hermana", image: "👧"},
+                {nasa: "Taalul", spanish: "Abuelo", image: "👴"},
+                {nasa: "Luula", spanish: "Abuela", image: "👵"},
+                {nasa: "Nxuw", spanish: "Tío", image: "👨‍🦰"},
+                {nasa: "Penxuw", spanish: "Tía", image: "👩‍🦳"},
+                {nasa: "Zxi'kh", spanish: "Hijo", image: "👶"},
+                {nasa: "Nxiis", spanish: "Hija", image: "👧"},
+              ],
+            },
+            bodyParts: {
+              name: "Partes del cuerpo",
+              emoji: "🧍",
+              words: [
+                {nasa: "dxikthe", spanish: "Cabeza", image: "🧠"},
+                {nasa: "kuse", spanish: "Manos", image: "✋"},
+                {nasa: "bab", spanish: "Hombros", image: "🤷"},
+                {nasa: "yuwe", spanish: "Boca", image: "👄"},
+                {nasa: "çiz", spanish: "Espalda", image: "🧍"},
+                {nasa: "ji'be", spanish: "Piernas", image: "🦵"},
+                {nasa: "çxida", spanish: "Pies", image: "🦶"},
+                {nasa: "nxukweth", spanish: "Rodillas", image: "🧎"},
+                {nasa: "tutxh", spanish: "Estómago", image: "🦠"},
+              ],
+            },
+            pronouns: {
+              name: "Pronombres",
+              emoji: "🙋",
+              words: [
+                {nasa: "Adx-Ü'kwe", spanish: "Yo", image: "🙋‍♂️"},
+                {nasa: "Idx", spanish: "Tú", image: "🙋‍♀️"},
+                {nasa: "Txãa", spanish: "Él-Ella", image: "👦👧"},
+                {nasa: "I'kwe'sx", spanish: "Ustedes", image: "👫"},
+                {nasa: "Kwe'sx", spanish: "Nosotros", image: "👫"},
+                {nasa: "Txãawe'sx", spanish: "Ellos", image: "👬"},
+              ],
+            },
           },
-          greetings: {
-            name: "Saludos",
-            emoji: "👋",
-            words: [
-              { nasa: "Ewçxa", spanish: "Hola", image: "👋" },
-              { nasa: "Ma'wkwe pe'th", spanish: "Buenos días", image: "🌅" },
-              { nasa: "Ma'wkwe fxi'z", spanish: "Buenas tardes", image: "🌇" },
-              { nasa: "Ma'wkwe ikus", spanish: "Buenas noches", image: "🌇" },
-              { nasa: "Ewçxa pe'th", spanish: "Estoy bien", image: "😊" },
-              { nasa: "Suwe", spanish: "¿Cómo estás?", image: "🤔" },
-              { nasa: "Weçx yuwe'kwe", spanish: "Bienvenidos", image: "🏡" },
-              { nasa: "Pay", spanish: "Gracias", image: "🖐️" },
-            ],
-          },
-          introductions: {
-            name: "Introducciones",
-            emoji: "📜",
-            words: [
-              { nasa: "Ädxa' yaasth", spanish: "Me llamo (Hombre)", image: "🤖" },
-              { nasa: "Ü'ka yaasth", spanish: "Me llamo (Mujer)", image: "🤖" }, 
-              { nasa: "Ju we'sxth", spanish: "Soy de", image: "🧑‍🏫" },
-              { nasa: "E'ba a'kafx ji'pth", spanish: "Tengo ... años", image: "😊" },
-              { nasa: "Teth mhi'", spanish: "Trabajo en", image: "🤔" },
-              { nasa: "Weçx wësejï'k", spanish: "Gracias por escucharme", image: "🤝" },
-            ],
-          },
-          numbers: {
-            name: "Números",
-            emoji: "🔢",
-            words: [
-              { nasa: "Teeçx", spanish: "Uno", image: "1️⃣" },
-              { nasa: "E'z", spanish: "Dos", image: "2️⃣" },
-              { nasa: "Tekh", spanish: "Tres", image: "3️⃣" },
-              { nasa: "Pahz", spanish: "Cuatro", image: "4️⃣" },
-              { nasa: "Tahç", spanish: "Cinco", image: "5️⃣" },
-              { nasa: "Setx", spanish: "Seis", image: "6️⃣" },
-              { nasa: "Sa't", spanish: "Siete", image: "7️⃣" },
-              { nasa: "Tawn", spanish: "Ocho", image: "8️⃣" },
-              { nasa: "Kheb", spanish: "Nueve", image: "9️⃣" },
-              { nasa: "Kseba", spanish: "Diez", image: "🔟" },
-            ],
-          },
-          family: {
-            name: "Familia",
-            emoji: "👨‍👩‍👧‍👦",
-            words: [
-              { nasa: "Tata", spanish: "Padre", image: "👨‍🦳" },
-              { nasa: "Uma", spanish: "Madre", image: "👩‍🦳" },
-              { nasa: "Yakhthẽ'", spanish: "Hermano", image: "👦" },
-              { nasa: "Zxi'sx", spanish: "Hermana", image: "👧" },
-              { nasa: "Taalul", spanish: "Abuelo", image: "👴" },
-              { nasa: "Luula", spanish: "Abuela", image: "👵" },
-              { nasa: "Nxuw", spanish: "Tío", image: "👨‍🦰" },
-              { nasa: "Penxuw", spanish: "Tía", image: "👩‍🦳" },
-              { nasa: "Zxi'kh", spanish: "Hijo", image: "👶" },
-              { nasa: "Nxiis", spanish: "Hija", image: "👧" },
-            ],
-          },
-          bodyParts: {
-            name: "Partes del cuerpo",
-            emoji: "🧍",
-            words: [
-              { nasa: "dxikthe", spanish: "Cabeza", image: "🧠" },
-              { nasa: "kuse", spanish: "Manos", image: "✋" },
-              { nasa: "bab", spanish: "Hombros", },
-              { nasa: "yuwe", spanish: "Boca", image: "👄" },
-              { nasa: "çiz", spanish: "Espalda", },
-              { nasa: "ji'be", spanish: "Piernas", image: "🦵" },
-              { nasa: "çxida", spanish: "Pies", image: "🦶" },
-              { nasa: "nxukweth", spanish: "Rodillas", image: "💪" },
-              { nasa: "tutxh", spanish: "Estómago", },
-            ],
-          },
-          pronouns: {
-            name: "Pronombres",
-            emoji: "🙋",
-            words: [
-              { nasa: "Adx-Ü'kwe", spanish: "Yo", image: "🙋‍♂️" },
-              { nasa: "Idx", spanish: "Tú", image: "🙋‍♀️" },
-              { nasa: "Txãa", spanish: "Él-Ella", image: "👦👧" },
-              { nasa: "I'kwe'sx", spanish: "Ustedes", image: "👫" },
-              { nasa: "Kwe'sx", spanish: "Nosotros", image: "👫" },
-              { nasa: "Txãawe'sx", spanish: "Ellos", image: "👬" },
-            ],
-          },
+          activeTheme: "greetings",
+          isPracticeMode: false,
+          score: 0,
+          streak: 0,
+          showCelebration: false,
+          selectedWord: null,
+          isCorrect: null,
+          userAnswer: "",
+          showHint: false,
+        };
+      },
+      methods: {
+        selectTheme(key) {
+          this.activeTheme = key;
+          this.endPractice();
         },
-        activeTheme: "greetings",
-        isPracticeMode: false,
-        score: 0,
-        streak: 0,
-        showCelebration: false,
-        selectedWord: null,
-        isCorrect: null,
-        userAnswer: "",
-        showHint: false,
-      };
-    },
-    methods: {
-      selectTheme(key) {
-        this.activeTheme = key;
-        this.endPractice();
-      },
-      startPractice() {
-        this.isPracticeMode = true;
-        this.generateExercise();
-      },
-      endPractice() {
-        this.isPracticeMode = false;
-        this.selectedWord = null;
-        this.userAnswer = "";
-        this.isCorrect = null;
-        this.showHint = false;
-      },
-      generateExercise() {
-        const words = this.themes[this.activeTheme].words;
-        this.selectedWord = words[Math.floor(Math.random() * words.length)];
-        this.userAnswer = "";
-        this.isCorrect = null;
-        this.showHint = false;
-      },
-      checkAnswer() {
-        if (this.userAnswer.toLowerCase() === this.selectedWord.nasa.toLowerCase()) {
-          this.isCorrect = true;
-          this.score += 10;
-          this.streak += 1;
-          this.showCelebration = this.streak >= 5;
-          setTimeout(() => (this.showCelebration = false), 2000);
-        } else {
-          this.isCorrect = false;
+        startPractice() {
+          this.isPracticeMode = true;
+          this.generateExercise();
+        },
+        endPractice() {
+          this.isPracticeMode = false;
+          this.selectedWord = null;
+          this.userAnswer = "";
+          this.isCorrect = null;
+          this.showHint = false;
+        },
+        generateExercise() {
+          const words = this.themes[this.activeTheme].words;
+          this.selectedWord = words[Math.floor(Math.random() * words.length)];
+          this.userAnswer = "";
+          this.isCorrect = null;
+          this.showHint = false;
+        },
+        checkAnswer() {
+          if (this.userAnswer.toLowerCase() === this.selectedWord.nasa.toLowerCase()) {
+            this.isCorrect = true;
+            this.score += 10;
+            this.streak += 1;
+            this.showCelebration = this.streak >= 5;
+            setTimeout(() => (this.showCelebration = false), 2000);
+          } else {
+            this.isCorrect = false;
+          }
+        },
+        convertPascalCase(text) {
+          // If the input is empty, return empty string
+          if (!text) return '';
+
+          // Use a regular expression to insert spaces before capital letters
+          // The regex looks for a lowercase letter followed by an uppercase letter
+          // and inserts a space between them
+          return text.replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+            .replace(/^./, char => char.toUpperCase());
         }
       },
-    },
-  });
+    });
 
-  app.mount("#app");
-</script>
+    app.mount("#app");
+  </script>
 
 </body>
+
 </html>
+<style>
+  .tituloListaLetras {
+    font-size: 30px;
+    text-align: center;
+    color: #9333ea;
+    margin: 20px auto;
+    font-weight: bold;
+  }
+
+  .listaLetras {
+    margin: 10px auto;
+    gap: 20px;
+  }
+</style>
